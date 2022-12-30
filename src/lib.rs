@@ -109,7 +109,7 @@ impl Game {
     pub fn is_started(&self) -> bool {
         match self.current_position.as_ref() {
             None => false,
-            Some(position) => true
+            Some(_) => true
         }
     }
 

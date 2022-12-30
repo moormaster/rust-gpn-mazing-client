@@ -23,7 +23,7 @@ fn main() {
     let mut reader = BufReader::new(stream.try_clone().unwrap());
 
     let mut game: Option<Game> = None;
-    let mut current_field_environment = None;
+    let mut current_field_environment;
 
     println!("[II] Logging in as {}", username);
     stream.write_all( format!("join|{}|{}\n", username, password).as_bytes() ).expect("failed to transmit login info");
@@ -83,7 +83,7 @@ fn main() {
 
             if let Some(game) = game.as_mut() {
                 if !game.is_started() {
-                    game.start(&Position::new(xpos, ypos));
+                    game.start(&Position::new(xpos, ypos)).unwrap();
                 }
 
                 current_field_environment = Some( FieldEnvironment::new(has_left_wall, has_right_wall, has_upper_wall, has_lower_wall) );
