@@ -5,28 +5,65 @@ use std::net::{Shutdown, TcpStream};
 
 use gpn_mazing_client::{FieldEnvironment, Game, Position};
 
-fn main() {
-    let arguments: Vec<String> = env::args().collect();
-    if arguments.len() < 5 {
-        panic!("Usage: {} <ip> <port> <user> <password>", arguments[0]);
+struct Config {
+    ip: String,
+    port: String,
+    username: String,
+    password: String
+}
+
+fn parse_arguments() -> Result<Config, String> {
+    let mut result = Config {
+        ip: "".to_string(),
+        port: "".to_string(),
+        username: "".to_string(),
+        password: "".to_string()
+    };
+
+    let mut positional_arguments: Vec<String> = vec![];
+    for arg in env::args() {
+        if arg.starts_with("-") {
+            match arg.as_str() {
+                _ => {}
+            }
+        } else {
+            positional_arguments.push(arg);
+        }
     }
 
+    if positional_arguments.len() < 5 {
+        return Err(format!("Usage: {} <ip> <port> <user> <password>", positional_arguments[0]));
+    }
 
-    let ip : &str = &arguments[1];
-    let port : &str = &arguments[2];
-    let username : &str = &arguments[3];
-    let password : &str = &arguments[4];
+    result.ip = positional_arguments[1].clone();
+    result.port = positional_arguments[2].clone();
+    result.username = positional_arguments[3].clone();
+    result.password = positional_arguments[4].clone();
 
-    println!("Connecting to {}:{}...", ip, port);
+    Ok(result)
+}
 
-    let mut stream = TcpStream::connect(format!("{}:{}", ip, port)).expect("Couldn't connect to server");
+fn main() {
+    let config = {
+        match parse_arguments() {
+            Ok(config) => { config },
+            Err(message) => {
+                println!("{}", message);
+                return;
+            }
+        }
+    };
+
+    println!("Connecting to {}:{}...", config.ip, config.port);
+
+    let mut stream = TcpStream::connect(format!("{}:{}", config.ip, config.port)).expect("Couldn't connect to server");
     let mut reader = BufReader::new(stream.try_clone().unwrap());
 
     let mut game: Option<Game> = None;
     let mut current_field_environment;
 
-    println!("[II] Logging in as {}", username);
-    stream.write_all( format!("join|{}|{}\n", username, password).as_bytes() ).expect("failed to transmit login info");
+    println!("[II] Logging in as {}", config.username);
+    stream.write_all( format!("join|{}|{}\n", config.username, config.password).as_bytes() ).expect("failed to transmit login info");
 
     let mut done = false;
     while !done {
