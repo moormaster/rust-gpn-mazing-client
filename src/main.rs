@@ -9,7 +9,8 @@ struct Config {
     ip: String,
     port: String,
     username: String,
-    password: String
+    password: String,
+    flag_continuous: bool
 }
 
 fn parse_arguments() -> Result<Config, String> {
@@ -17,13 +18,15 @@ fn parse_arguments() -> Result<Config, String> {
         ip: "".to_string(),
         port: "".to_string(),
         username: "".to_string(),
-        password: "".to_string()
+        password: "".to_string(),
+        flag_continuous: false
     };
 
     let mut positional_arguments: Vec<String> = vec![];
     for arg in env::args() {
         if arg.starts_with("-") {
             match arg.as_str() {
+                "--continuous" | "-c" => { result.flag_continuous = true; },
                 _ => {}
             }
         } else {
@@ -32,7 +35,7 @@ fn parse_arguments() -> Result<Config, String> {
     }
 
     if positional_arguments.len() < 5 {
-        return Err(format!("Usage: {} <ip> <port> <user> <password>", positional_arguments[0]));
+        return Err(format!("Usage: {} [-c|--continuous] <ip> <port> <user> <password>", positional_arguments[0]));
     }
 
     result.ip = positional_arguments[1].clone();
@@ -100,7 +103,9 @@ fn main() {
             let losses: usize = parts[2].split("\n").collect::<Vec<&str>>()[0].parse().expect("Failed to loss count value");
             println!("[II] We lost. ({} wins / {} losses)", wins, losses);
 
-            done = true;
+            if !config.flag_continuous {
+                done = true;
+            }
         }
 
         if buf.starts_with("win") {
@@ -109,7 +114,9 @@ fn main() {
             let losses: usize = parts[2].split("\n").collect::<Vec<&str>>()[0].parse().expect("Failed to loss count value");
             println!("[II] We have won. ({} wins / {} losses)", wins, losses);
 
-            done = true;
+            if !config.flag_continuous {
+                done = true;
+            }
         }
 
         if buf.starts_with("pos") {
