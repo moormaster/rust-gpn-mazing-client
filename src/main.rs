@@ -59,13 +59,19 @@ fn main() {
 
         if buf.starts_with("lose") {
             let parts: Vec<&str> = buf.split("|").collect();
-            println!("[II] We lost. ({} wins / {} losses)", parts[1], parts[2]);
+            let wins: usize = parts[1].parse().expect("Failed to parse win count value");
+            let losses: usize = parts[2].split("\n").collect::<Vec<&str>>()[0].parse().expect("Failed to loss count value");
+            println!("[II] We lost. ({} wins / {} losses)", wins, losses);
+
             done = true;
         }
 
         if buf.starts_with("win") {
             let parts: Vec<&str> = buf.split("|").collect();
-            println!("[II] We have won. ({} wins / {} losses)", parts[1], parts[2]);
+            let wins: usize = parts[1].parse().expect("Failed to parse win count value");
+            let losses: usize = parts[2].split("\n").collect::<Vec<&str>>()[0].parse().expect("Failed to loss count value");
+            println!("[II] We have won. ({} wins / {} losses)", wins, losses);
+
             done = true;
         }
 
